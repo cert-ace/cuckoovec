@@ -5,7 +5,7 @@ from libcpp.string cimport string
 from libcpp.pair cimport pair
 
 
-cdef extern from "libcuckoo/cuckoovector.hh" namespace "libcuckoo":
+cdef extern from "libcuckoo/src/cuckoovector.hh":
   cdef cppclass CityHasher[Key]:
     const size_t operator()(const Key&)
   

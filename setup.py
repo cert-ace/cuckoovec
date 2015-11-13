@@ -4,6 +4,6 @@ from Cython.Build import cythonize
 setup(
     ext_modules = cythonize(
 		"cuckoovec.pyx",
-		sources=["libcuckoo/src/cuckoohash_map.hh"],
+		sources=["libcuckoo/src/cuckoohash_map.hh","libcuckoo/src/cuckoovector.hh"],
 		language="c++")
 )
