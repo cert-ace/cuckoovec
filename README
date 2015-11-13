@@ -1,0 +1,3 @@
+Rudimentary Python implementation of cuckoo linear algebra. See:
+
+Li Zhou, David G. Andersen, Mu Li, and Alexander J. Smola. 2015. Cuckoo Linear Algebra. In Proceedings of the 21th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD '15). ACM, New York, NY, USA, 1553-1562. DOI=http://dx.doi.org/10.1145/2783258.2783263 
