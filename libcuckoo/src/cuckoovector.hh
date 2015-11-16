@@ -13,6 +13,10 @@ class cuckoovector : public cuckoohash_map<std::string, double> {
 		void inserts(std::string k, double v) {
 			cuckoohash_map::insert(k, v);
 		}
+
+		void set(std::string k, double v) {
+			(*this)[k] = v;
+		}
 		
 		double find(std::string k) { 
 			double v = 0.0;
@@ -24,7 +28,7 @@ class cuckoovector : public cuckoohash_map<std::string, double> {
 			double nrm = 0.0;
 			auto lt = lock_table();
 			for (const auto& entry : lt) {
-				nrm = nrm + pow(abs(entry.second), p);
+				nrm = nrm + pow(fabs(entry.second), p);
 			}
 			return pow(nrm, 1.0/p);
         }
@@ -38,10 +42,20 @@ class cuckoovector : public cuckoohash_map<std::string, double> {
 			return dt;
 		}
             
-		void add(double a, cuckoovector *v) {
+		void scale(double a) {
 			auto lt = lock_table();
-			for (auto& entry : lt) {
-				entry.second = a * entry.second + v->find(entry.first);
+			auto iter = lt.begin();
+			while (iter != lt.end()) {
+				auto entry = *iter;
+				iter->second = a * iter->second;
+				iter++;
+			}
+		}
+			
+		void add(cuckoovector *v) {
+			auto lt = v->lock_table();
+			for (const auto& entry : lt) {
+				set(entry.first, find(entry.first) + entry.second);
 			}
 		}
 };

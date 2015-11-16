@@ -23,14 +23,25 @@ cdef class CuckooVector:
       s = bytes(k, encoding='UTF-8')
       self.vec.inserts(s, v)
 
+  def __setitem__(self, k, double v):
+    s = bytes(k, encoding='UTF-8')
+    self.vec.set(s, v)
+	  
+  def __getitem__(self, k):
+    s = bytes(k, encoding='UTF-8')
+    return self.vec.find(s)	
+	  
   def norm(self, int p):
     return self.vec.norm(p)
 
   def dot(self, CuckooVector v):
     return self.vec.dot(v.vec)
-#
-#  def add(self, a, CuckooVector v):
-#    return self.vec.add(a, v.vec)
+
+  def scale(self, double a):
+    self.vec.scale(a)
+	
+  def add(self, CuckooVector v):
+    self.vec.add(v.vec)
         
 #    def __iter__(self):
 #        cdef veciterator entry = self.map.begin()

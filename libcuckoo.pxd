@@ -96,12 +96,14 @@ cdef extern from "libcuckoo/src/cuckoovector.hh":
 	
 	# Cython bombs on "insert".
     void inserts(string k, double v)
+    void set(string k, double v)
     double find(string k)
     double norm(int p)
 	
 	# Cython/cpp can't handle pointer dereferencing.
     double dot(cuckoovector *v)
-    void add(double a, cuckoovector *v)
+    void scale(double a)
+    void add(cuckoovector *v)
 	
 #  cdef cppclass veciterator:
 #    pair[const string, double] operator*()
