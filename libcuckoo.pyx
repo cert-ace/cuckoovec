@@ -9,6 +9,8 @@ from libcpp cimport bool
 from libcpp.pair cimport pair
 from libcuckoo cimport cuckoovector, cv_locked_table
 
+ctypedef void (*kvcallback)(string k, double v)
+  
 cdef class CuckooVector:
   cdef cuckoovector *vec;
   
@@ -43,8 +45,22 @@ cdef class CuckooVector:
   def add(self, CuckooVector v):
     self.vec.add(v.vec)
 
-  # Need to heap-allocate stuff in Cython. But Cython tries to use the default constructors...
-  # which don't exist for these classes. Try to forcibly heap allocate.
+  # Key iteration methods
+  # Need to heap-allocate stuff in Cython. But Cython tries to use the default constructors,
+  # which don't exist for these classes. Do weird things to forcibly heap allocate.
+  # copy-and-paste versions for C callback and Python generator
+  
+  cdef each(self, kvcallback kvcb): 
+    cdef cv_locked_table* lock = new cv_locked_table((self.vec.lock_table()))
+    cdef cv_locked_table.cv_templated_iterator* iter = new cv_locked_table.cv_templated_iterator( deref(lock).begin() )
+  
+    while deref(iter) != deref(lock).end():
+      kvcb(deref(deref(iter)).first, deref(deref(iter)).second)
+      inc(deref(iter))
+
+    del iter
+    del lock
+
   def items(self): 
     cdef cv_locked_table* lock = new cv_locked_table((self.vec.lock_table()))
     cdef cv_locked_table.cv_templated_iterator* iter = new cv_locked_table.cv_templated_iterator( deref(lock).begin() )
@@ -55,20 +71,3 @@ cdef class CuckooVector:
 
     del iter
     del lock
-  
-  
-	
-#  def items(self):
-    # can't pass C++ objects to constructors without wrapping.
-#    cvi = CuckooVectorIterator()
-#    cvi.iter = self.vec.items()
-#    return cvi
-
-
-	
-#        cdef veciterator entry = self.map.begin()
-#        cdef pair[const string, double] kv; 
-#        while entry != self.map.end():
-#            kv = deref(entry)
-#            yield kv
-#            inc(entry)

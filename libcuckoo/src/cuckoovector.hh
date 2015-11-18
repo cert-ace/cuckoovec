@@ -5,31 +5,8 @@
 #include <cmath>
 #include "cuckoohash_map.hh"
 
-typedef void (*entrycallback)(std::string key, double value);
-/*
-typedef cuckoohash_map<std::string, double>::locked_table cvlock; 
+// Smooth over the rough bits of Cython
 
-class cviterator : cvlock::iterator {		
-	public: 
-		cviterator(cvlock l) : cvlock::iterator( {
-			lt = std::move(l);
-			cur = std::move(lt.begin());
-		}
-		
-		std::pair<const std::string, double>* next() { 
-			kv = (cur == lt.end()) ? NULL : &*cur;
-			cur++;
-			return kv;
-		}	
-		
-	cvlock lt;
-	std::pair<const std::string, double>* kv;
-};
-*/
-
-// Cython can't deal with default template arguments; this fills them in.
-// locked_table is a private class, which complicates the Cython
-// This manages all the locking for the single-threaded Python 
 class cuckoovector : public cuckoohash_map<std::string, double> {	
 	public:
 		void inserts(std::string k, double v) {
@@ -82,13 +59,6 @@ class cuckoovector : public cuckoohash_map<std::string, double> {
 			auto lt = v->lock_table();
 			for (const auto& entry : lt) {
 				set(entry.first, find(entry.first) + entry.second);
-			}
-		}
-		
-		void each(entrycallback cb) {
-			auto lt = lock_table();
-			for (const auto& entry : lt) {
-				cb(entry.first, entry.second);
 			}
 		}
 };
