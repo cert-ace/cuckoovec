@@ -7,7 +7,7 @@ from cython.operator cimport dereference as deref, preincrement as inc
 from libcpp.string cimport string
 from libcpp cimport bool
 from libcpp.pair cimport pair
-from libcuckoo cimport cuckoovector
+from libcuckoo cimport cuckoovector, cv_locked_table
 
 cdef class CuckooVector:
   cdef cuckoovector *vec;
@@ -42,8 +42,30 @@ cdef class CuckooVector:
 	
   def add(self, CuckooVector v):
     self.vec.add(v.vec)
-        
-#    def __iter__(self):
+
+  # Need to heap-allocate stuff in Cython. But Cython tries to use the default constructors...
+  # which don't exist for these classes. Try to forcibly heap allocate.
+  def items(self): 
+    cdef cv_locked_table* lock = new cv_locked_table((self.vec.lock_table()))
+    cdef cv_locked_table.cv_templated_iterator* iter = new cv_locked_table.cv_templated_iterator( deref(lock).begin() )
+  
+    while deref(iter) != deref(lock).end():
+      yield (deref(deref(iter)).first, deref(deref(iter)).second)
+      inc(deref(iter))
+
+    del iter
+    del lock
+  
+  
+	
+#  def items(self):
+    # can't pass C++ objects to constructors without wrapping.
+#    cvi = CuckooVectorIterator()
+#    cvi.iter = self.vec.items()
+#    return cvi
+
+
+	
 #        cdef veciterator entry = self.map.begin()
 #        cdef pair[const string, double] kv; 
 #        while entry != self.map.end():

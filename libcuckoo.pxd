@@ -15,15 +15,14 @@ cdef extern from "<iterator>" namespace "std" nogil:
 cdef extern from "libcuckoo/src/cuckoohash_map.hh":
   cdef cppclass CityHasher[Key]:
     const size_t operator()(const Key&)
-  
-  
+    
   cdef cppclass cuckoohash_map[Key, T, Hash, Pred, Alloc, SLOT_PER_BUCKET]:
 #    cppclass locked_table:
 #      iterator[bidirectional_iterator_tag, pair[const Key&, T]] begin()
 #      iterator[bidirectional_iterator_tag, pair[const Key&, T]] end()
 #      bool has_table_lock()
 #        cppclass templated_iterator:
-#            pair[const string, double] operator*()
+#            pair[const Key&, T] operator*()
 #            templated_iterator operator++()
 #            bool operator==(templated_iterator)
 #            bool operator!=(templated_iterator)
@@ -61,7 +60,19 @@ cdef extern from "libcuckoo/src/cuckoohash_map.hh":
     #locked_table lock_table()
 
 cdef extern from "libcuckoo/src/cuckoovector.hh":	
-  cdef cppclass cuckoovector:
+  cppclass cv_locked_table "cuckoohash_map<std::string, double>::locked_table":
+    cppclass cv_templated_iterator "templated_iterator<false>":
+      cv_templated_iterator(cv_templated_iterator&&)
+      pair[const string, double] operator*()
+      cv_templated_iterator& operator++()
+      bool operator==(cv_templated_iterator)
+      bool operator!=(cv_templated_iterator)	
+    cv_locked_table(cv_locked_table&&)	  
+    cv_templated_iterator begin()
+    cv_templated_iterator end()
+    bool has_table_lock()
+  
+  cppclass cuckoovector:  
     cuckoovector() except +    
     void clear()
     size_t size()
@@ -92,7 +103,7 @@ cdef extern from "libcuckoo/src/cuckoovector.hh":
     #reference  operator[] (const Key&) 
     #const const_reference  operator[] (const Key&)  
     void purge() 
-    #cuckoohash_map.locked_table lock_table()
+    cv_locked_table lock_table()
 	
 	# Cython bombs on "insert".
     void inserts(string k, double v)
@@ -104,9 +115,8 @@ cdef extern from "libcuckoo/src/cuckoovector.hh":
     double dot(cuckoovector *v)
     void scale(double a)
     void add(cuckoovector *v)
+
+    # Maybe preferable to use callbacks rather than attempt 
+	# to export iterator types to Cython.
+    # void each(entrycallback cb)	
 	
-#  cdef cppclass veciterator:
-#    pair[const string, double] operator*()
-#    veciterator operator++()
-#    bool operator==(veciterator)
-#    bool operator!=(veciterator)
