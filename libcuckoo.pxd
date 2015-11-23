@@ -56,10 +56,40 @@ cdef extern from "libcuckoo/src/cuckoovector.hh":
 	
 	# Cython bombs on "insert".
     void inserts(string k, double v)
-    void set(string k, double v)
+    void set(const string &k, double v)
     double find(string k)
 	
     double norm(int p)
     double dot(cuckoovector *v)
     void scale(double a)
-    void add(cuckoovector *v)	
+    void add(cuckoovector *v)
+    void add_scale(cuckoovector *v, double v_scale)
+
+cdef extern from "libcuckoo/src/cuckoomatrix.hh":	
+  cppclass cm_locked_table "cuckoohash_map<std::string, cuckoovector*>::locked_table":
+    cppclass cm_templated_iterator "templated_iterator<false>":
+      cm_templated_iterator(cm_templated_iterator&&)
+      pair[const string, cuckoovector *] operator*()
+      cm_templated_iterator& operator++()
+      bool operator==(cm_templated_iterator)
+      bool operator!=(cm_templated_iterator)	
+    cm_locked_table(cm_locked_table&&)	  
+    cm_templated_iterator begin()
+    cm_templated_iterator end()
+    bool has_table_lock()
+
+cdef extern from "libcuckoo/src/cuckoomatrix.hh":	
+  cppclass cuckoomatrix:
+    cuckoomatrix() except +
+    void set(const string &r, const string &c, double v)
+    double find(const string &r, const string &c)
+    void clear()
+    void add(cuckoomatrix *m)
+    void add_scale(cuckoomatrix *m, double mscale)
+    void mult_vec(cuckoovector *v, cuckoovector *out)
+    void mult(cuckoomatrix *m, cuckoomatrix *out)
+    cuckoovector *get_col(const string &k_col)    
+    cuckoovector *get_or_insert_col(const string &k_col)
+    cm_locked_table lock_table()
+
+    
