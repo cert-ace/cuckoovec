@@ -70,8 +70,8 @@ cdef CuckooVectorView_Init(cuckoovector *v):
   v_out.vec = v
   return v_out
 
-# A CuckooVector is a CuckooVectorView that also owns teh underlying cuckoovector
-# pointer (i.e. deltes it upon destruction)
+# A CuckooVector is a CuckooVectorView that also owns the underlying cuckoovector
+# pointer (i.e. deletes it upon destruction)
 cdef class CuckooVector(CuckooVectorView):
   def __cinit__(self):
     self.vec = new cuckoovector()
