@@ -1,0 +1,5 @@
+__pycache__/*
+build/*
+libcuckoo.cpp
+*.so
+*.o
