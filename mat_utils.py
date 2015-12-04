@@ -59,63 +59,88 @@ def power_iteration_mmt(m, iterations, v0):
         for c in m:
             vp.add_scale(c, c.dot(v))
 
-        mu = v.norm(2)        
+        mu = vp.norm(2)        
         vp.scale(1.0/mu)
         v = vp
         
     return mu,v
+
+# Power iteration on YX^TXY^T - U diag(S) U^T
+# where X,Y and U are lists of column vectors and S is a list of scalars 
+def power_iteration_4(Y, X, U, S, iterations, v0):
+    v = CuckooVector({})    
+    v.add(v0)
+
+    for i in range(iterations):
+        v1 = CuckooVector({})
+        for (x,y) in zip(X,Y):
+            v1.add_scale(x, y.dot(v))
+                
+        v2 = CuckooVector({})
+        for (x,y) in zip(X,Y):
+            v2.add_scale(y, x.dot(v1))        
         
-#r1 matrix
-c = CuckooVector({})
-c['w1'] = 2.0;
-c['w2'] = 3.0;
-m = CuckooMatrix()
-add_r1_matrix(m, c, c, 1.0)
+        for (u,s) in zip(U,S):
+            print(-s * u.dot(v)) 
+            v2.add_scale(u, -s * u.dot(v))        
+            
+        mu = v2.norm(2)        
+        v2.scale(1.0/mu)
+        v = v2
 
-assert m['w1', 'w1'] == 4.0
-assert m['w2', 'w1'] == 6.0
-assert m['w1', 'w2'] == 6.0
-assert m['w2', 'w2'] == 9.0
+    return mu,v
+    
+if __name__ == "__main__":
+    #r1 matrix
+    c = CuckooVector({})
+    c['w1'] = 2.0;
+    c['w2'] = 3.0;
+    m = CuckooMatrix()
+    add_r1_matrix(m, c, c, 1.0)
 
-#get_col
-m.clear()
-m['w2','w2'] = 5.0
-assert m.get_col('w1') is None
-assert m.get_col('w2')['w2'] == 5.0
+    assert m['w1', 'w1'] == 4.0
+    assert m['w2', 'w1'] == 6.0
+    assert m['w1', 'w2'] == 6.0
+    assert m['w2', 'w2'] == 9.0
 
-#mmt
-m.clear()
-m['w1','w1'] = 1.0
-m['w2','w1'] = 2.0
-m = mmt(m)
+    #get_col
+    m.clear()
+    m['w2','w2'] = 5.0
+    assert m.get_col('w1') is None
+    assert m.get_col('w2')['w2'] == 5.0
 
-assert m['w1', 'w1'] == 1.0
-assert m['w2', 'w1'] == 2.0
-assert m['w1', 'w2'] == 2.0
-assert m['w2', 'w2'] == 4.0
+    #mmt
+    m.clear()
+    m['w1','w1'] = 1.0
+    m['w2','w1'] = 2.0
+    m = mmt(m)
 
+    assert m['w1', 'w1'] == 1.0
+    assert m['w2', 'w1'] == 2.0
+    assert m['w1', 'w2'] == 2.0
+    assert m['w2', 'w2'] == 4.0
 
-#power iteration
-c = CuckooVector({})
-c['w1'] = 1.0;
-c['w2'] = 1.0;
-m = CuckooMatrix()
-add_r1_matrix(m, c, c, 1.0)
+    #power iteration
+    c = CuckooVector({})
+    c['w1'] = 1.0;
+    c['w2'] = 1.0;
+    m = CuckooMatrix()
+    add_r1_matrix(m, c, c, 1.0)
 
-c['w1'] = 2.0;
-c['w2'] = -2.0;
-add_r1_matrix(m, c, c, 1.0)
+    c['w1'] = 2.0;
+    c['w2'] = -2.0;
+    add_r1_matrix(m, c, c, 1.0)
 
-v0 = sum_columns(m)
-v0['w2'] = 0.3
-mu,u = power_iteration(m, 10, v0)
-print(mu)
-print(u['w1'])
-print(u['w2'])
+    v0 = sum_columns(m)
+    v0['w2'] = 0.3
+    mu,u = power_iteration(m, 10, v0)
+    print(mu)
+    print(u['w1'])
+    print(u['w2'])
 
-add_r1_matrix(m, u, u, -mu)
-mu,u = power_iteration(m, 10, v0)
-print(mu)
-print(u['w1'])
-print(u['w2'])
+    add_r1_matrix(m, u, u, -mu)
+    mu,u = power_iteration(m, 10, v0)
+    print(mu)
+    print(u['w1'])
+    print(u['w2'])
 
