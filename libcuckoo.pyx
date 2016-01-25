@@ -3,6 +3,9 @@
 # Slow (single-threaded, cache-busting) and not-particularly-numerically-stable implementation of cuckoo linear algebra.
 # floats indexed by size_t's
 
+# Init a global string to alleviate some Cython bugs
+STUFF = "Hi"
+
 from cython.operator cimport dereference as deref, preincrement as inc
 from libcpp.string cimport string
 from libcpp cimport bool
@@ -38,6 +41,17 @@ cdef class CuckooVectorView:
   def add_scale(self, CuckooVectorView v, double vscale):
     self.vec.add_scale(v.vec, vscale)
 
+  # methods to interact with sparse dictionaries
+  def add_scale_dict(self, dict v, double vscale):
+    for (k,val) in v.items():
+      self[k] += val * vscale
+
+  def dot_dict(self, dict v):
+    cdef double out = 0.0
+    for (k,val) in v.items():
+      out += self[k] * val
+    return out
+        
   # Key iteration methods
   # Need to heap-allocate stuff in Cython. But Cython tries to use the default constructors,
   # which don't exist for these classes. Do weird things to forcibly heap allocate.
@@ -72,11 +86,10 @@ cdef CuckooVectorView_Init(cuckoovector *v):
 
 # A CuckooVector is a CuckooVectorView that also owns the underlying cuckoovector
 # pointer (i.e. deletes it upon destruction)
-cdef class CuckooVector(CuckooVectorView):
-  def __cinit__(self):
-    self.vec = new cuckoovector()
+cdef class CuckooVector(CuckooVectorView):  
+  def __cinit__(self, dict m, int n = 4096):      
+    self.vec = new cuckoovector(n)
 
-  def __init__(self, dict m):      
     for k,v in m.iteritems():
       s = bytes(k, encoding='UTF-8')
       self.vec.inserts(s, v)

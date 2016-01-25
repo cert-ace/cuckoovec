@@ -9,6 +9,12 @@
 
 class cuckoovector : public cuckoohash_map<std::string, double> {	
 	public:
+                cuckoovector(size_t n)
+                    : cuckoohash_map(n) {}
+  
+                cuckoovector()
+                    : cuckoovector(DEFAULT_SIZE) {}
+  
 		void inserts(std::string k, double v) {
 			cuckoohash_map::insert(k, v);
 		}
