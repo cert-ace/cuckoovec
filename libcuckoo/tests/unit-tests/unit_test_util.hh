@@ -129,7 +129,7 @@ size_t table_capacity(const CuckoohashMap& table) {
 // This class is a friend of the table, so it can access those.
 class UnitTestInternalAccess {
 public:
-    static const size_t IntIntTableInfoSize = sizeof(IntIntTable::TableInfo);
+    static const size_t IntIntBucketSize = sizeof(IntIntTable::Bucket);
 
     template <class CuckoohashMap>
     static size_t old_table_info_size(const CuckoohashMap& table) {
@@ -141,6 +141,23 @@ public:
     static typename CuckoohashMap::SnapshotNoLockResults snapshot_table_nolock(
         const CuckoohashMap& table) {
         return table.snapshot_table_nolock();
+    }
+
+    template <class CuckoohashMap>
+    static typename CuckoohashMap::partial_t partial_key(const size_t hv) {
+        return CuckoohashMap::partial_key(hv);
+    }
+
+    template <class CuckoohashMap>
+    static size_t index_hash(const size_t hashpower, const size_t hv) {
+        return CuckoohashMap::index_hash(hashpower, hv);
+    }
+
+    template <class CuckoohashMap>
+    static size_t alt_index(const size_t hashpower,
+                            const typename CuckoohashMap::partial_t partial,
+                            const size_t index) {
+        return CuckoohashMap::alt_index(hashpower, partial, index);
     }
 };
 
