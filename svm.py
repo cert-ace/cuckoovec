@@ -5,7 +5,6 @@ import numpy as np
 # aka "pegasos"
 # http://ttic.uchicago.edu/~nati/Publications/PegasosMPB.pdf
 
-@profile
 def svm_primal_sgd(X, Y, lam, T):  
   w = CuckooVector({})
   x = CuckooVector({})

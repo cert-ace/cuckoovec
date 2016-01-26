@@ -22,6 +22,9 @@ Xtrain, Xtest, Ytrain, Ytest = train_test_split(X, Y, test_size=0.25)
 
 w = svm_primal_sgd(Xtrain, Ytrain, 0.1, 5000)
 
-xv = CuckooVector({}) 
-print("train errors: ", np.mean([(xv.reset(x) == None and xv.dot(w)*y > 0) for (x,y) in zip(Xtrain,Ytrain)]))
-print("test errors: ", np.mean([(xv.reset(x) == None and xv.dot(w)*y > 0) for (x,y) in zip(Xtest,Ytest)]))
+def weightedError(w, Xt, Yt):
+   xv = CuckooVector({})
+   return 1 + np.mean([(xv.reset(x) == None and xv.dot(w)*y) for (x,y) in zip(Xt,Yt)])/2
+   
+print("train errors: ", weightedError(w, Xtrain, Ytrain))
+print("test errors: ", weightedError(w, Xtest, Ytest))
