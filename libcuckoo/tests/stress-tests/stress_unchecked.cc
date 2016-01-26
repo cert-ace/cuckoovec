@@ -209,6 +209,7 @@ void misc_thread(AllEnvironment<KType> *env) {
         env->table.load_factor();
         env->table.hash_function();
         env->table.key_eq();
+        env->table.purge();
     }
 }
 

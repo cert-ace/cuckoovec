@@ -3,7 +3,7 @@ import numpy as np
 
 def cartesian(seq, grams):
   weights = [np.product([vec[w] for vec,w in zip(seq, gram)]) for gram in grams]
-  return dict(zip([''.join(gram) for gram in grams], weights))
+  return dict(zip([','.join(gram) for gram in grams], weights))
   
 # form n-gram vector from a sequence of n vectors, each sparsely represented as a dict
 # weight of each n-gram is product of weights of constituent words   
@@ -29,11 +29,15 @@ def cum_ngrams(seq, t=1e-5):
     for i1,i2 in itertools.product(seq[i].items(),tmp.items()):
       w = i1[1] * i2[1]
       if w >= t:
-        tmp2[i1[0]+i2[0]] = w
+        tmp2[i1[0]+','+i2[0]] = w
 
     tmp = tmp2        
     out.update(tmp2)
   return out
+
+# same as above, but for arrays
+def cum_ngrams_arr(seq, t=1e-5):
+  return cum_ngrams([{str(k): l[k] for k in range(len(l))} for l in seq])
   
 if __name__ == "__main__":
   s1 = [randsparse(t) for i in range(n)]

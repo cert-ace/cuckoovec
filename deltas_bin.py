@@ -1,10 +1,10 @@
 import struct
 
-def delta(m1, m2):
-  return [v2-v1 for v1,v2 in zip(m1,m2)]
+def delta(m1, m2, t=1e-5):
+  return [v2-v1 for v1,v2 in zip(m1,m2) if abs(v2-v1)>t]
 
-def deltas(M): 
-  return [delta(m1,m2) for m1,m2 in zip(M[:],M[1:])] 
+def deltas(M, t=1e-5): 
+  return [delta(m1,m2,t) for m1,m2 in zip(M[:],M[1:])] 
   
 def readDetections(binfile):  
   with open(binfile, 'rb') as input:
