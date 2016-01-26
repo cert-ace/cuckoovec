@@ -1,7 +1,7 @@
 '''
 Program to convert detections from text to binary format.
 Use: 
-python txt2bin.py <result_folder> <output_bin_file>
+python3 txt2bin.py <result_folder> <output_bin_file>
 
 Binary format:
 Number of templates (2 bytes unsigned int)
@@ -47,3 +47,4 @@ with open(binary, 'wb') as output:
     output.seek(2)
     output.write(struct.pack('<I', num_frames))
 
+    print(num_frames)

@@ -1,5 +1,5 @@
-from cuckoovec import CuckooVector
-from cuckoovec import CuckooMatrix
+from libcuckoo import CuckooVector
+from libcuckoo import CuckooMatrix
 
 #Computes vv^T
 def r1_from_vector(v):
@@ -65,20 +65,29 @@ def power_iteration_mmt(m, iterations, v0):
         
     return mu,v
 
-# Power iteration on YX^TXY^T - U diag(S) U^T
-# where X,Y and U are lists of column vectors and S is a list of scalars 
+"""
+Power iteration on YX^TXY^T - U diag(S) U^T
+where X,Y and U are lists of column vectors and S is a list of scalars 
+
+Additioanl parameters:
+ iterations: Number of iterations
+ v0: Initial eigen vector
+
+Returns:
+ A tuple (top eigen value, top eigen vector) 
+"""
 def power_iteration_4(Y, X, U, S, iterations, v0):
     v = CuckooVector({})    
     v.add(v0)
 
     for i in range(iterations):
         v1 = CuckooVector({})
-        for (x,y) in zip(X,Y):
-            v1.add_scale(x, y.dot(v))
+        for (x,y) in zip(X,Y):            
+            v1.add_scale_dict(x, v.dot_dict(y))
                 
         v2 = CuckooVector({})
         for (x,y) in zip(X,Y):
-            v2.add_scale(y, x.dot(v1))        
+            v2.add_scale_dict(y, v1.dot_dict(x))        
         
         for (u,s) in zip(U,S):
             print(-s * u.dot(v)) 

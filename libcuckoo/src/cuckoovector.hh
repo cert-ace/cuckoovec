@@ -11,6 +11,12 @@
 // This manages all the locking for the single-threaded Python 
 class cuckoovector : public cuckoohash_map<std::string, double, CityHasher<std::string>> {	
 	public:
+                cuckoovector(size_t n)
+                    : cuckoohash_map(n) {}
+  
+                cuckoovector()
+                    : cuckoovector(DEFAULT_SIZE) {}
+  
 		void inserts(std::string k, double v) {
 			cuckoohash_map::insert(k, v);
 		}

@@ -22,7 +22,8 @@ cdef extern from "libcuckoo/src/cuckoovector.hh":
     bool has_table_lock()
   
   cppclass cuckoovector:  
-    cuckoovector() except +    
+    cuckoovector() except +
+    cuckoovector(size_t) except +    
     void clear()
     size_t size()
     bool empty()
