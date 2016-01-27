@@ -4,12 +4,10 @@
 #include <cstdlib>
 #include <cmath>
 #include "cuckoohash_map.hh"
-#include "city_hasher.hh"
 
-// Cython can't deal with default template arguments; this fills them in.
-// locked_table is a private class, which complicates the Cython
-// This manages all the locking for the single-threaded Python 
-class cuckoovector : public cuckoohash_map<std::string, double, CityHasher<std::string>> {	
+// Smooth over the rough bits of Cython
+
+class cuckoovector : public cuckoohash_map<std::string, double> {	
 	public:
                 cuckoovector(size_t n)
                     : cuckoohash_map(n) {}
@@ -21,7 +19,7 @@ class cuckoovector : public cuckoohash_map<std::string, double, CityHasher<std::
 			cuckoohash_map::insert(k, v);
 		}
 
-		void set(std::string k, double v) {
+		void set(const std::string &k, double v) {
 			(*this)[k] = v;
 		}
 		
@@ -35,12 +33,14 @@ class cuckoovector : public cuckoohash_map<std::string, double, CityHasher<std::
 			double nrm = 0.0;
 			auto lt = lock_table();
 			for (const auto& entry : lt) {
-				nrm = nrm + pow(abs(entry.second), p);
+				nrm = nrm + pow(fabs(entry.second), p);
 			}
 			return pow(nrm, 1.0/p);
         }
 		
 		double dot(cuckoovector *v) {
+			if (this == v) return pow(norm(2),2);
+			
 			double dt = 0.0;
 			auto lt = lock_table();
 			for (const auto& entry : lt) {
@@ -49,13 +49,31 @@ class cuckoovector : public cuckoohash_map<std::string, double, CityHasher<std::
 			return dt;
 		}
             
-		void add(double a, cuckoovector *v) {
+		void scale(double a) {
 			auto lt = lock_table();
 			auto iter = lt.begin();
 			while (iter != lt.end()) {
 				auto entry = *iter;
-				iter->second = a * iter->second + v->find(iter->first);
+				iter->second = a * iter->second;
 				iter++;
+			}
+		}
+			
+		void add(cuckoovector *v) {
+			if (this == v) return scale(2);
+			
+			auto lt = v->lock_table();
+			for (const auto& entry : lt) {
+				set(entry.first, find(entry.first) + entry.second);
+			}
+		}
+
+  void add_scale(cuckoovector *v, double vscale) {
+			if (this == v) return scale(1.0 + vscale);
+			
+			auto lt = v->lock_table();
+			for (const auto& entry : lt) {
+				set(entry.first, find(entry.first) + vscale * entry.second);
 			}
 		}
 };
