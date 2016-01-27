@@ -1,4 +1,4 @@
-from cuckoovec import CuckooVector
+from libcuckoo import CuckooVector
 import numpy as np
 
 # stochastic primal subgradient descent
