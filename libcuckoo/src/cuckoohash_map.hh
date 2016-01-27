@@ -1884,7 +1884,7 @@ public:
             release();
         }
 
-    private:
+    public:
         //! A templated iterator whose implementation works for both const and
         //! non_const iterators. It is an STL-style BidirectionalIterator that
         //! can be used to iterate over a locked table.
