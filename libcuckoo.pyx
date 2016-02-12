@@ -26,6 +26,15 @@ cdef class CuckooVectorView:
     s = bytes(k, encoding='UTF-8')
     return self.vec.find(s)	
 	  
+  def clear(self):
+    return self.vec.clear()
+	
+  def reset(self, dict m):
+    self.clear()
+    for k,v in m.iteritems():
+      s = bytes(k, encoding='UTF-8')
+      self.vec.inserts(s, v)
+	
   def norm(self, int p):
     return self.vec.norm(p)
 
@@ -90,9 +99,8 @@ cdef class CuckooVector(CuckooVectorView):
   def __cinit__(self, dict m, int n = 4096):      
     self.vec = new cuckoovector(n)
 
-    for k,v in m.iteritems():
-      s = bytes(k, encoding='UTF-8')
-      self.vec.inserts(s, v)
+  def __init__(self, dict m):    
+    self.reset(m)
 	
   def __dealloc__(self):
     del self.vec

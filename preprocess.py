@@ -3,6 +3,11 @@ import numpy as np
 import struct
 from ngrams import cum_ngrams
 
+# 30 frames a second?
+def frame_to_index(f):
+  n = [int(s) for s in f.split(':')]
+  return n[0]*30^2 + n[1]*30 + n[2]
+  
 def delta(m1, m2):
   return [v2-v1 for v1,v2 in zip(m1,m2)]
 
