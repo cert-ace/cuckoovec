@@ -4,6 +4,7 @@ import mat_utils_dict as mat
 import numpy as np
 import time
 import pickle
+import gzip
 
 # N-gram length
 n = 5
@@ -58,7 +59,13 @@ for i in range(1000):
     # Output the singular vectors produced so far every 5 iterations
     if i % 5 == 0:
         print(i)
-        pickle.dump((U,S), open('uds4vid.pcl.' + str(i % 2), 'wb'))
+        #pickle.dump((U,S), gzip.open( + '.gz', 'wb'), 0)
+        checkpoint_name = 'uds4vid.' + str(i % 2)
+        Uk = [k for k in U[0].keys()]
+        Uv = np.asarray([[U[j][x] for x in U[0].keys()] for j in range(i+1)])
+        np.save(checkpoint_name, Uv)
+        pickle.dump((Uk,S), gzip.open(checkpoint_name + '.gz', 'wb'), -1)
+
         end = time.time()
         duration = end-start
         print('Finished iteration ' + str(i) + ', elapsed time = ' + str(duration))
