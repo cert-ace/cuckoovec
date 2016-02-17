@@ -5,12 +5,12 @@ import numpy as np
 import time
 import pickle
 import gzip
+import sys
 
 # N-gram length
 n = 5
 
 # Constructing examples
-"""
 P = [] # pasts
 F = [] # futures
 X = []
@@ -21,19 +21,24 @@ for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
     D = deltas(R)
     A = np.asarray(D) #Convert to Numpy array
     A.ravel()[np.where(np.abs(A).ravel() < 1e-3)] = 0.0 #Apply threshold to score deltas
-    T = filterByAbsRowSum(A, 1e-3) 
+    [idx,T] = filterByAbsRowSum(A, 1e-3) 
     s = stringify(T)
     sn = extract_ngrams(s, n, 1e-4)
 
-    X += sn 
+    idx = idx[n:]
+
+    X += [(idx,sn)] 
     P += sn[:-n]
     F += sn[n:]
 
     pickle.dump((X,P,F), open('xpf.pcl', 'wb'))
-"""   
+   
 (X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
 
 rnd = np.random
+
+print ("Start")
+sys.stdout.flush()
 
 start = time.time()
 
@@ -52,6 +57,7 @@ S = []
 # with deflation.
 for i in range(1000):
     print(i)
+    sys.stdout.flush()
     mu,u = mat.power_iteration_4(F, P, U, S, 10, v0)
     S.append(mu)
     U.append(u)
@@ -59,6 +65,7 @@ for i in range(1000):
     # Output the singular vectors produced so far every 5 iterations
     if i % 5 == 0:
         print(i)
+        sys.stdout.flush()
         #pickle.dump((U,S), gzip.open( + '.gz', 'wb'), 0)
         checkpoint_name = 'uds4vid.' + str(i % 2)
         Uk = [k for k in U[0].keys()]
@@ -69,6 +76,7 @@ for i in range(1000):
         end = time.time()
         duration = end-start
         print('Finished iteration ' + str(i) + ', elapsed time = ' + str(duration))
+        sys.stdout.flush()
 
 S = np.sqrt(S)
 

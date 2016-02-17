@@ -8,7 +8,7 @@ def frame_to_index(f):
   n = [int(s) for s in f.split(':')]
   return n[0]*30^2 + n[1]*30 + n[2]
   
-def delta(m1, m2):
+def delta(m1, m2): 
   return [v2-v1 for v1,v2 in zip(m1,m2)]
 
 # Converts a doubly indexed list of scores (e.g. the output of readDetections)
@@ -48,7 +48,8 @@ def readDetections(folder):
 
 # Removes rows from amatrix whose absolute sum is below a given threshold.
 def filterByAbsRowSum(data, t):
-  return data[np.array([np.sum(np.abs(row)) > t for row in data])]
+  idx = np.asarray([i for i in range(data.shape[0]) if np.sum(np.abs(data[i,:])) > t])
+  return (idx,data[idx])
 
 # Create seperate feature for positive and negative deltas.
 def sepSign(data):

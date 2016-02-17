@@ -37,7 +37,7 @@ for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
     P += sn[:-n]
     F += sn[n:]
 
-    pickle.dump((X,P,F), open('xpf.pcl', 'wb'))
+    pickle.dump((X,P,F), open('xpf.pcl', 'wb', -1))
 """   
 (X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
 
