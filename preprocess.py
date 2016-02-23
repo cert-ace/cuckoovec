@@ -1,7 +1,7 @@
 import os, sys, glob
 import numpy as np
 import struct
-from ngrams import cum_ngrams
+from ngrams import cum_ngrams, cum_fwd_ngrams
 
 # 30 frames a second?
 def frame_to_index(f):
@@ -27,8 +27,8 @@ def readDetections(folder):
     T = num_frames * [None]
     f = 0
     
-    print(num_frames)
-    print(num_templates)
+    #print(num_frames)
+    #print(num_templates)
 
     input.read(16)
 
@@ -36,7 +36,7 @@ def readDetections(folder):
     while len(b) > 0:
       T[f] = num_templates * [None]
       i = struct.unpack('<I', b)[0]
-      print(i)
+      #print(i)
       for t in range(num_templates):
         T[f][t] = struct.unpack('<d', input.read(8))[0] # Read confidence
         input.read(4) # Read position      
@@ -90,9 +90,19 @@ def extract_ngrams(sdata, n, threshold):
   out = [None] * l
 
   for i in range(l):
-    print(i)
+    #print(i)
     out[i] = cum_ngrams(sdata[i:i+n], threshold)
 
   return out
-  
-  #return [cum_ngrams(sdata[i:i+n]) for i in range(len(sdata)-n)]
+
+# Same as above but using forward ngrams (see ngrams.py)
+def extract_fwd_ngrams(sdata, n, threshold):  
+  l = len(sdata)-n
+  out = [None] * l
+
+  for i in range(l):
+    #print(i)
+    out[i] = cum_fwd_ngrams(sdata[i:i+n], threshold)
+
+  return out
+

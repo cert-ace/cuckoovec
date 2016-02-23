@@ -1,7 +1,7 @@
 import numpy as np
 import pickle
 from sklearn.cross_validation import train_test_split
-from sklearn.svm import LinearSVC
+from sklearn.svm import *
 
 def time_to_frame(f):
   n = [int(s) for s in f.split(':')]
@@ -45,7 +45,7 @@ for f in range(2):
     yf = np.zeros(nf)
 
     for i in range(0,nf):
-      t = X[f][0][i+5]
+      t = X[f][0][i]
 
       if pos.get(t, 0) == 1:
         yf[i] = 1
@@ -58,7 +58,7 @@ XX = UF.T
         
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(XX, YY, test_size=0.25)
 
-svm = LinearSVC().fit(Xtrain, Ytrain)
-svm.score(Xtest, Ytest)
+svm = LinearSVC(class_weight='balanced').fit(Xtrain, Ytrain)
+print(svm.score(Xtest, Ytest))
 
 

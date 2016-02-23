@@ -10,34 +10,37 @@ import sys
 # N-gram length
 n = 5
 
-# Constructing examples
-P = [] # pasts
-F = [] # futures
-X = []
+# # Constructing examples
+# print('Preprocessing Files')
+# P = [] # pasts
+# F = [] # futures
+# X = []
 
-for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
-    print(f)
-    R = readDetections(f)
-    D = deltas(R)
-    A = np.asarray(D) #Convert to Numpy array
-    A.ravel()[np.where(np.abs(A).ravel() < 1e-3)] = 0.0 #Apply threshold to score deltas
-    [idx,T] = filterByAbsRowSum(A, 1e-3) 
-    s = stringify(T)
-    sn = extract_ngrams(s, n, 1e-4)
+# for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
+#     print(f)
+#     sys.stdout.flush()
+#     R = readDetections(f)
+#     D = deltas(R)
+#     A = np.asarray(D) #Convert to Numpy array
+#     A.ravel()[np.where(np.abs(A).ravel() < 1e-3)] = 0.0 #Apply threshold to score deltas
+#     [idx,T] = filterByAbsRowSum(A, 1e-3) 
+#     s = stringify(T)
+#     sn = extract_ngrams(s, n, 1e-4)
+#     snf = extract_fwd_ngrams(s, n, 1e-4)
 
-    idx = idx[n:]
+#     idx = idx[n:]
 
-    X += [(idx,sn)] 
-    P += sn[:-n]
-    F += sn[n:]
+#     X += [(idx,sn,snf)] 
+#     P += sn[:-n]
+#     F += snf[n:]
 
-    pickle.dump((X,P,F), open('xpf.pcl', 'wb'))
+#     pickle.dump((X,P,F), open('xpf.pcl', 'wb'))
    
 (X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
 
 rnd = np.random
 
-print ("Start")
+print('Start')
 sys.stdout.flush()
 
 start = time.time()
@@ -45,7 +48,7 @@ start = time.time()
 # Form an initial vector for power iteration by taking a randomly
 # weighted sum of training examples.
 v0 = {}
-for x in X:
+for x in F:
     mat.dict_add_scale(v0, x, rnd.normal(0.0, 5.0))
 
 U = []
