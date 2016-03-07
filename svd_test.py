@@ -7,6 +7,8 @@ import numpy as np
 import time
 import pickle
 
+out_dir = "/home/ahefny/"
+
 def cuckoo2dict(c):
     d = {}
     for (k,v) in c.items():
@@ -18,7 +20,6 @@ def cuckoo2dict(c):
 n = 5
 
 # Constructing examples
-"""
 P = [] # pasts
 F = [] # futures
 X = []
@@ -37,9 +38,8 @@ for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
     P += sn[:-n]
     F += sn[n:]
 
-    pickle.dump((X,P,F), open('xpf.pcl', 'wb', -1))
-"""   
-(X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
+    pickle.dump((X,P,F), open(out_dir + 'xpf.pcl', 'wb', -1))   
+#(X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
 
 rnd = np.random
 
@@ -71,7 +71,7 @@ for i in range(1000):
     # Output the singular vectors produced so far every 5 iterations
     if i % 5 == 0:
         print(i)
-        pickle.dump((Ud,S), open('uds4vid.pcl.' + str(i % 2), 'wb'))
+        pickle.dump((Ud,S), open(out_dir + 'uds4vid.pcl.' + str(i % 2), 'wb'))
         end = time.time()
         duration = end-start
         print('Finished iteration ' + str(i) + ', elapsed time = ' + str(duration))

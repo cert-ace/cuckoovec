@@ -7,36 +7,39 @@ import pickle
 import gzip
 import sys
 
+#out_dir = '/home/ahefny/'
+out_dir = '/media/ahefny/Data/'
+
 # N-gram length
 n = 5
 
-# # Constructing examples
-# print('Preprocessing Files')
-# P = [] # pasts
-# F = [] # futures
-# X = []
+# Constructing examples
+print('Preprocessing Files')
+P = [] # pasts
+F = [] # futures
+X = []
 
-# for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
-#     print(f)
-#     sys.stdout.flush()
-#     R = readDetections(f)
-#     D = deltas(R)
-#     A = np.asarray(D) #Convert to Numpy array
-#     A.ravel()[np.where(np.abs(A).ravel() < 1e-3)] = 0.0 #Apply threshold to score deltas
-#     [idx,T] = filterByAbsRowSum(A, 1e-3) 
-#     s = stringify(T)
-#     sn = extract_ngrams(s, n, 1e-4)
-#     snf = extract_fwd_ngrams(s, n, 1e-4)
+for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
+    print(f)
+    sys.stdout.flush()
+    R = readDetections(f)
+    D = deltas(R)
+    A = np.asarray(D) #Convert to Numpy array
+    A.ravel()[np.where(np.abs(A).ravel() < 1e-3)] = 0.0 #Apply threshold to score deltas
+    [idx,T] = filterByAbsRowSum(A, 1e-3) 
+    s = stringify(T)
+    sn = extract_ngrams(s, n, 1e-4)
+    snf = extract_fwd_ngrams(s, n, 1e-4)
 
-#     idx = idx[n:]
+    idx = idx[n:]
 
-#     X += [(idx,sn,snf)] 
-#     P += sn[:-n]
-#     F += snf[n:]
+    X += [(idx,sn,snf)] 
+    P += sn[:-n]
+    F += snf[n:]
 
-#     pickle.dump((X,P,F), open('xpf.pcl', 'wb'))
-   
-(X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
+    pickle.dump((X,P,F), open(out_dir + 'xpf.pcl', 'wb'))
+
+#(X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
 
 rnd = np.random
 
@@ -66,11 +69,15 @@ for i in range(1000):
     U.append(u)
 
     # Output the singular vectors produced so far every 5 iterations
-    if i % 5 == 0:
+    # The output consists of two files:
+    # .npy: Numpy file containing singular vectors stored as a matrix (each row is a vector)
+    # .gz: A gzipped pickle containing a tuple (K,S), where:
+    #   K is a list of key names corresponding to coordinates in the singular vectors.
+    #   S is a list of square singular values.
+    if (i+1) % 5 == 0:
         print(i)
         sys.stdout.flush()
-        #pickle.dump((U,S), gzip.open( + '.gz', 'wb'), 0)
-        checkpoint_name = 'uds4vid.' + str(i % 2)
+        checkpoint_name = out_dir + 'uds4vid.' + str(i % 2)
         Uk = [k for k in U[0].keys()]
         Uv = np.asarray([[U[j][x] for x in U[0].keys()] for j in range(i+1)])
         np.save(checkpoint_name, Uv)
