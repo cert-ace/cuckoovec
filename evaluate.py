@@ -1,19 +1,20 @@
 import numpy as np
 import pickle
+import matplotlib.pyplot as plt
 from sklearn.cross_validation import train_test_split
 from sklearn.svm import *
 from scipy.io import savemat
 from sklearn.metrics import roc_curve
 
-work_dir = '/home/ahefny/'
+work_dir = '/home/ahefny/0.1'
 #work_dir = '/media/ahefny/Data/'
 
 def time_to_frame(f):
   n = [int(s) for s in f.split(':')]
   return (n[0]*(3600) + n[1]*60 + n[2]) * 30
 
-csv = ['data/1412.csv', 'data/1413.csv']
-ufile = [work_dir+'UF0.npy', work_dir+'UF1.npy']
+csv = ['data/1412.csv', 'data/1413.csv', 'data/1414.csv', 'data/1415.csv']
+ufile = [work_dir+'UF0.npy', work_dir+'UF1.npy', work_dir+'UF2.npy', work_dir+'UF3.npy']
 (X,F,P) = pickle.load(open(work_dir+'xpf.pcl', 'rb'))
 UF = None
 y = np.asarray([])
@@ -74,6 +75,10 @@ YY = y * 2 - 1
 XX = UF.T
         
 Xtrain, Xtest, Ytrain, Ytest = train_test_split(XX, YY, test_size=0.25)
+#Xtrain = XX[0:-6103,:]
+#Xtest = XX[-6103:,:]
+#Ytrain = YY[0:-6103]
+#Ytest = YY[-6103:]
 
 # Linear SVM 
 svm = LinearSVC().fit(Xtrain, Ytrain)
@@ -85,7 +90,22 @@ svm_bal = LinearSVC(class_weight='balanced').fit(Xtrain, Ytrain)
 print(svm_bal.score(Xtest, Ytest))
 Yh_bal = svm_bal.decision_function(Xtest)
 
+# Decision Tree
+clf = tree.DecisionTreeClassifier().fit(Xtrain, Ytrain)
+print(clf.score(Xtest, Ytest))
+Yh_tr = clf.predict_proba(Xtest)[:,1]
+
 # Compute and save ROC curves
-savemat(work_dir+'roc.mat', {'roc' : roc_curve(Ytest, Yh), 'roc_bal' : roc_curve(Ytest, Yh_bal)})
+roc = {};
+roc['roc'] = roc_curve(Ytest, Yh)
+roc['roc_bal'] = roc_curve(Ytest, Yh_bal)
+roc['roc_tr'] = roc_curve(Ytest, Yh_tr)
+savemat(work_dir+'roc.mat', roc)
 
-
+plt.figure()
+plt.plot(np.asarray([0,1]), np.asarray([0,1]), 'k--')
+plt.hold(True)
+plt.plot(roc['roc_bal'][0], roc['roc_bal'][1])
+plt.plot(roc['roc_tr'][0], roc['roc_tr'][1])
+plt.hold(False)
+plt.savefig('roc.png')

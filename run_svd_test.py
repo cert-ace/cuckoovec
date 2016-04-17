@@ -6,9 +6,14 @@ import time
 import pickle
 import gzip
 import sys
+import os
 
-#out_dir = '/home/ahefny/'
-out_dir = '/media/ahefny/Data/'
+l1_lambda_str = '1.0' if len(sys.argv) < 2 else sys.argv[1]
+l1_lambda = float(l1_lambda_str)
+out_dir = '/home/ahefny/acelmb/' + l1_lambda_str + '/'
+#out_dir = '/media/ahefny/'
+
+os.makedirs(out_dir, exist_ok=True)
 
 # N-gram length
 n = 5
@@ -19,27 +24,28 @@ P = [] # pasts
 F = [] # futures
 X = []
 
-for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
-    print(f)
-    sys.stdout.flush()
-    R = readDetections(f)
-    D = deltas(R)
-    A = np.asarray(D) #Convert to Numpy array
-    A.ravel()[np.where(np.abs(A).ravel() < 1e-3)] = 0.0 #Apply threshold to score deltas
-    [idx,T] = filterByAbsRowSum(A, 1e-3) 
-    s = stringify(T)
-    sn = extract_ngrams(s, n, 1e-4)
-    snf = extract_fwd_ngrams(s, n, 1e-4)
+# for f in ['data/1412.bin','data/1413.bin','data/1414.bin','data/1415.bin']:
+#     print(f)
+#     sys.stdout.flush()
+#     R = readDetections(f)
+#     D = deltas(R)
+#     A = np.asarray(D) #Convert to Numpy array
+#     A.ravel()[np.where(np.abs(A).ravel() < 1e-3)] = 0.0 #Apply threshold to score deltas
+#     [idx,T] = filterByAbsRowSum(A, 1e-3) 
+#     s = stringify(T)
+#     sn = extract_ngrams(s, n, 1e-4)
+#     snf = extract_fwd_ngrams(s, n, 1e-4)
 
-    idx = idx[n:]
+#     idx = idx[n:]
 
-    X += [(idx,sn,snf)] 
-    P += sn[:-n]
-    F += snf[n:]
+#     X += [(idx,sn,snf)] 
+#     P += sn[:-n]
+#     F += snf[n:]
 
-    pickle.dump((X,P,F), open(out_dir + 'xpf.pcl', 'wb'))
-
-#(X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
+#     pickle.dump((X,P,F), open(out_dir + 'xpf.pcl', 'wb'))
+#exit()
+    
+(X,F,P) = pickle.load(open('xpf.pcl', 'rb'))
 
 rnd = np.random
 
@@ -64,7 +70,8 @@ S = []
 for i in range(1000):
     print(i)
     sys.stdout.flush()
-    mu,u = mat.power_iteration_4(F, P, U, S, 10, v0)
+    #mu,u = mat.power_iteration_4(F, P, U, S, 10, v0)
+    mu,u = mat.sparse_power_iteration_4(F, P, U, S, l1_lambda, 10, v0)
     S.append(mu)
     U.append(u)
 

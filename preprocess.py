@@ -68,7 +68,7 @@ def stringify_row(row):
 
   idx = np.where(row < 0)[0]
   for (i,x) in zip(idx,row[idx]):
-    out[str(-i)] = -x
+    out['-'+str(i)] = -x
 
   # null-word to capture shorter n-grams
   #out['_'] = 1.0
