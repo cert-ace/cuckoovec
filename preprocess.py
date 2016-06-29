@@ -18,8 +18,10 @@ def deltas(M):
   return [delta(m1,m2) for m1,m2 in zip(M[:],M[1:])] 
   
 # Reads data from a binary result file. Returns a two dimensional list of scores.
-# First dimension is the frame id. Second dimension is the template id. 
-def readDetections(folder):  
+# First dimension is the frame id. Second dimension is the template id.
+# If return_pos is True, the function returns a two dimensional list of tuples
+# in the form (score, x_pos, y_pos).
+def readDetections(folder, return_pos = False):  
   with open(folder, 'rb') as input:
     num_templates = struct.unpack('<H', input.read(2))[0]
     num_frames = struct.unpack('<I', input.read(4))[0]
@@ -38,13 +40,15 @@ def readDetections(folder):
       i = struct.unpack('<I', b)[0]
       #print(i)
       for t in range(num_templates):
-        T[f][t] = struct.unpack('<d', input.read(8))[0] # Read confidence
-        input.read(4) # Read position      
+        score = struct.unpack('<d', input.read(8))[0] # Read confidence
+        x_pos = struct.unpack('<H', input.read(2))[0] # Read x pos
+        y_pos = struct.unpack('<H', input.read(2))[0] # Read y pos
+        T[f][t] = (score, x_pos, y_pos)
 
       f += 1
       b = input.read(4)
-
-  return T
+      
+    return T
 
 # Removes rows from amatrix whose absolute sum is below a given threshold.
 def filterByAbsRowSum(data, t):
