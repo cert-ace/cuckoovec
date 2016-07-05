@@ -16,13 +16,52 @@ def delta(m1, m2):
 # score_diff[t][template] = M[t+1][template]-M[t][template]
 def deltas(M): 
   return [delta(m1,m2) for m1,m2 in zip(M[:],M[1:])] 
-  
+
 # Reads data from a binary result file. Returns a two dimensional list of scores.
 # First dimension is the frame id. Second dimension is the template id.
 # If return_pos is True, the function returns a two dimensional list of tuples
 # in the form (score, x_pos, y_pos).
-def readDetections(folder, return_pos = False):  
-  with open(folder, 'rb') as input:
+def readDetections(filename, return_pos = False):  
+  with open(filename, 'rb') as input:
+    input.readline()
+    line = input.readline()
+    num_frames = int(line.split()[-1])
+    line = input.readline()
+    num_templates = int(line.split()[-1])
+
+    print(num_frames)
+    print(num_templates)
+
+    for i in range(num_templates): input.readline()
+
+    T = num_frames * [None]
+    f = 0
+    
+    #print(num_frames)
+    #print(num_templates)
+
+    b = input.read(4)
+    while len(b) > 0:
+      T[f] = num_templates * [None]
+      i = struct.unpack('<i', b)[0]
+
+      for t in range(num_templates):
+        ss = input.read(8)
+        score = struct.unpack('<d', ss)[0] # Read confidence
+        x_pos = struct.unpack('<i', input.read(4))[0] # Read x pos
+        y_pos = struct.unpack('<i', input.read(4))[0] # Read y pos
+        T[f][t] = (score, x_pos, y_pos)
+
+        #if f == 647: print(i, score, x_pos, y_pos)
+
+      f += 1
+      b = input.read(4)
+      
+    return T
+  
+# Reads data from a binary result file produced by txt2bin.
+def readDetections_legacy(filename, return_pos = False):  
+  with open(filename, 'rb') as input:
     num_templates = struct.unpack('<H', input.read(2))[0]
     num_frames = struct.unpack('<I', input.read(4))[0]
 

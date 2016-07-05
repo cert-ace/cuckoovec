@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 import matplotlib.pyplot as plt
 
-file = 'data/1412.bin'
+file = '/media/ahefny/Data/ace/1412_june_result.bin'
 
 r = preprocess.readDetections(file, True)
 video_length = len(r)
